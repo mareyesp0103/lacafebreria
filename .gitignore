@@ -3,5 +3,8 @@ node_modules/
 out/
 next-env.d.ts
 *.tsbuildinfo
-.qa-shots/
 build/
+
+# Capturas de verificación, sea cual sea el SHOT_DIR que se pase.
+# El comentario va en su propia línea: .gitignore no lo admite junto al patrón.
+.qa-*/

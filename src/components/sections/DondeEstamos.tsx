@@ -1,19 +1,19 @@
 import { Clock, Instagram, MapPin, MessageCircle, Phone } from "lucide-react";
+import { Horario } from "@/components/sections/Horario";
 import { contacto, horario, SIN_CONFIRMAR } from "@/data/site";
 import { telefonoHref, whatsapp } from "@/lib/whatsapp";
 
 /**
- * Cómo llegar y cómo preguntar.
+ * Cómo llegar, cuándo y cómo preguntar.
  *
- * El horario NO está en el material entregado. Publicar uno inventado es el
- * error más caro que puede cometer el sitio de una cafetería: manda a alguien
- * a una puerta cerrada y quema la visita. Mientras no esté confirmado, el
- * bloque dice que está sujeto a actualización y deriva a WhatsApp, que es
- * donde de verdad se resuelve.
+ * El horario ocupa su propia tarjeta porque es la pregunta que trae a alguien
+ * a la página de una cafetería. Si `horario.confirmado` fuese false, ese bloque
+ * desaparece y en su lugar queda la derivación a WhatsApp: es preferible no
+ * decir nada a mandar a alguien a una puerta cerrada.
  *
- * Tampoco hay mapa incrustado: sin las coordenadas verificadas del local, un
- * iframe apuntaría a una posición aproximada. El enlace de Maps busca por la
- * dirección completa, que sí consta.
+ * No hay mapa incrustado: el enlace corto de la ficha de Google no expone
+ * latitud y longitud, y un iframe con coordenadas estimadas de mirar un mapa
+ * señalaría un portal que no es. El enlace abre la ficha real.
  */
 export function DondeEstamos() {
   return (
@@ -57,48 +57,11 @@ export function DondeEstamos() {
               Escribir por WhatsApp
             </a>
           </div>
-        </div>
 
-        <div className="card p-7 sm:p-8">
-          <h3 className="text-[1.2rem] font-bold text-espresso">Antes de venir</h3>
-
-          {/* `dt` y `dd` deben ser hijos DIRECTOS del `dl` o de un único `div`
-              envolvente. Con el icono en una columna propia de la retícula, el
-              par queda al nivel correcto sin anidar un segundo contenedor. */}
-          <dl className="mt-5 space-y-5">
-            <div className="grid grid-cols-[auto_1fr] gap-x-3.5">
-              <Clock
-                size={19}
-                className="row-span-2 mt-1 shrink-0 text-terracotta"
-                aria-hidden="true"
-              />
-              <dt className="text-[0.95rem] font-bold text-espresso">Horario</dt>
-              <dd className="col-start-2 mt-0.5 text-[0.95rem] leading-relaxed text-ink-dim">
-                  {horario.confirmado && horario.dias.length > 0 ? (
-                    <ul>
-                      {horario.dias.map((t) => (
-                        <li key={t.dias.join()} className="tabular">
-                          {t.dias.join(", ")}: {t.abre}–{t.cierra}
-                        </li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <>
-                      {SIN_CONFIRMAR}.{" "}
-                      <a
-                        href={whatsapp("horario")}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="font-semibold text-terracotta-text underline underline-offset-4 hover:text-espresso"
-                      >
-                        Pregúntanos por WhatsApp
-                      </a>{" "}
-                      y te confirmamos el de hoy.
-                    </>
-                  )}
-              </dd>
-            </div>
-
+          <dl className="mt-9 space-y-5 border-t border-line pt-7">
+            {/* `dt` y `dd` deben ser hijos DIRECTOS del `dl` o de un único `div`
+                envolvente. Con el icono en su propia columna de la retícula, el
+                par queda al nivel correcto sin anidar un segundo contenedor. */}
             <div className="grid grid-cols-[auto_1fr] gap-x-3.5">
               <Phone
                 size={19}
@@ -136,6 +99,45 @@ export function DondeEstamos() {
               </dd>
             </div>
           </dl>
+        </div>
+
+        <div className="card h-fit p-7 sm:p-8">
+          <h3 className="flex items-center gap-2.5 text-[1.2rem] font-bold text-espresso">
+            <Clock size={20} className="shrink-0 text-terracotta" aria-hidden="true" />
+            Horario
+          </h3>
+
+          <div className="mt-5">
+            {horario.confirmado && horario.dias.length > 0 ? (
+              <Horario />
+            ) : (
+              <p className="text-[0.98rem] leading-relaxed text-ink-dim">
+                {SIN_CONFIRMAR}.{" "}
+                <a
+                  href={whatsapp("horario")}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-semibold text-terracotta-text underline underline-offset-4 hover:text-espresso"
+                >
+                  Pregúntanos por WhatsApp
+                </a>{" "}
+                y te confirmamos el de hoy.
+              </p>
+            )}
+          </div>
+
+          <p className="mt-6 border-t border-line pt-5 text-[0.88rem] leading-relaxed text-ink-dim">
+            ¿Vienes en una fecha especial?{" "}
+            <a
+              href={whatsapp("horario")}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-semibold text-terracotta-text underline underline-offset-4 hover:text-espresso"
+            >
+              Escríbenos
+            </a>{" "}
+            y te confirmamos el horario de ese día.
+          </p>
         </div>
       </div>
     </section>

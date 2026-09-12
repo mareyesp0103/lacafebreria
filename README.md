@@ -41,15 +41,23 @@ e `Iced Mocca` son los nombres del establecimiento, no erratas.
 
 | Dato | Estado | Dónde se activa |
 |---|---|---|
-| **Horario de atención** | No entregado | `horario` en `src/data/site.ts`: poner `confirmado: true` y rellenar `dias`. El bloque «Antes de venir» y el `openingHours` del JSON-LD aparecen solos |
+| **Horario de atención** | Entregado el 12/09/2026 | `horario` en `src/data/site.ts`. Publicado, con el día de hoy marcado y «abierto ahora» calculado en el cliente |
 | **Fotografías** | No hay ninguna | Ver «Cuando lleguen las fotos» |
 | **Logotipo vectorial** | Sólo ráster de 236×231 px | Ver `src/components/brand/Logo.tsx` |
-| **Ficha de Google / coordenadas** | No entregada | `contacto.mapsUrl` en `site.ts`; al tenerla, añadir `geo` en `src/lib/schema.ts` |
+| **Coordenadas del local** | El enlace corto de Google no las expone | Al tenerlas, añadir `geo` en `src/lib/schema.ts`. El enlace de la ficha real ya está en `contacto.mapsUrl` |
 | **Dominio** | No contratado | `site.url` en `site.ts` |
 
 Los datos que cambian solos —puntuación, número de reseñas, rango de consumo—
 se publican **con su fecha** y llevan `confirmado`. Si se pone en `false`, la
-interfaz muestra «Información sujeta a actualización» en lugar del dato.
+interfaz muestra «Información sujeta a actualización» en lugar del dato. Vale
+igual para el horario: con `confirmado: false` desaparecen la tabla, el estado
+de apertura y el `openingHoursSpecification` del JSON-LD, y el bloque deriva a
+WhatsApp.
+
+El estado «abierto ahora» se calcula **en el cliente y en la hora del local**
+(`America/Guayaquil`), nunca en el build: un sitio estático se compila una vez
+y se sirve durante semanas, así que hornear ahí qué día es produce un dato
+falso a las pocas horas.
 
 ---
 

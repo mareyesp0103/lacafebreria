@@ -47,14 +47,13 @@ export const contacto = {
     completa: "Edificio Ases, Catalina Aldaz N34-77 y Av. Portugal, Quito, Ecuador",
   },
   /**
-   * Enlace de búsqueda por dirección, no por identificador de ficha: no
-   * disponemos del place_id ni de las coordenadas verificadas del local.
-   * Sustituir por el enlace corto de la ficha de Google cuando el cliente
-   * lo facilite — y sólo entonces añadir `geo` al JSON-LD.
+   * Enlace corto de la ficha real de Google, facilitado por el cliente
+   * (2026-09-12). Resuelve al local exacto, no a una búsqueda por dirección.
+   *
+   * Sigue sin publicarse `geo` en el JSON-LD: el enlace corto no expone
+   * latitud y longitud, y no se van a estimar de un mapa.
    */
-  mapsUrl:
-    "https://www.google.com/maps/search/?api=1&query=" +
-    encodeURIComponent("La Cafebrería UIO, Catalina Aldaz N34-77 y Av. Portugal, Quito"),
+  mapsUrl: "https://maps.app.goo.gl/7Yr8scym4HKpq6EU8",
   instagram: "https://www.instagram.com/lacafebreriauio/",
   instagramHandle: "@lacafebreriauio",
   linktree: "https://linktr.ee/lacafreuio",
@@ -87,19 +86,33 @@ export const consumo = {
 } as const;
 
 /**
- * HORARIO — no facilitado.
+ * HORARIO — facilitado por el cliente el 2026-09-12.
  *
- * El cliente no entregó horario y la carta no lo contiene. Inventarlo sería
- * el peor error posible en una cafetería: manda a alguien a una puerta
- * cerrada. Queda vacío y la interfaz deriva a WhatsApp.
+ * Con `confirmado: true` la interfaz publica la tabla, marca el día de hoy y
+ * dice si está abierto ahora; el JSON-LD emite `openingHoursSpecification`.
+ * Poniéndolo en `false` todo eso desaparece y el bloque deriva a WhatsApp: es
+ * preferible no decir nada a mandar a alguien a una puerta cerrada.
  *
- * Para publicarlo: poner `confirmado: true` y rellenar `dias`. La ficha
- * `openingHours` del JSON-LD sólo se emite cuando `confirmado` es true.
+ * `dias` lleva los nombres de schema.org, que `lib/schema.ts` consume tal cual.
+ * `etiqueta` es lo que se lee en pantalla. Horas en formato 24 h.
  */
 export const horario = {
-  confirmado: false,
-  /** { dias: ["Mo","Tu"], abre: "07:30", cierra: "19:00" } */
-  dias: [] as { dias: string[]; abre: string; cierra: string }[],
+  confirmado: true,
+  /** Fecha en que el cliente facilitó estos horarios. */
+  fecha: "2026-09-12",
+  /** Zona del local: fija cuál es «hoy» sin depender de dónde esté quien mira. */
+  zona: "America/Guayaquil",
+  dias: [
+    { dias: ["Monday"], etiqueta: "Lunes", abre: "08:00", cierra: "18:00" },
+    {
+      dias: ["Tuesday", "Wednesday", "Thursday", "Friday"],
+      etiqueta: "Martes a viernes",
+      abre: "08:00",
+      cierra: "19:00",
+    },
+    { dias: ["Saturday"], etiqueta: "Sábado", abre: "08:00", cierra: "17:00" },
+    { dias: ["Sunday"], etiqueta: "Domingo", abre: "09:00", cierra: "13:00" },
+  ] as { dias: string[]; etiqueta: string; abre: string; cierra: string }[],
 } as const;
 
 /**
