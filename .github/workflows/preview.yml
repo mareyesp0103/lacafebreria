@@ -1,0 +1,67 @@
+# Publica una vista previa del sitio en GitHub Pages.
+#
+# Requiere activarlo una sola vez en el repositorio:
+#   Settings → Pages → Build and deployment → Source: "GitHub Actions"
+#
+# La vista previa queda en https://<usuario>.github.io/<repositorio>/ y se
+# publica con `noindex`, para no competir con el dominio definitivo.
+name: Vista previa
+
+on:
+  push:
+    branches:
+      - main          # ajustar a la rama de trabajo
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Un despliegue a la vez; no se cancela el que esté en curso.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Comprobar tipos
+        run: npm run typecheck
+
+      - name: Verificar catálogo de imágenes
+        run: python3 scripts/check-media.py
+
+      - name: Compilar la exportación estática
+        # El sitio se sirve bajo /<repositorio>/, así que las rutas y los
+        # assets necesitan ese prefijo.
+        env:
+          NEXT_PUBLIC_BASE_PATH: /${{ github.event.repository.name }}
+        run: npm run build
+
+      - name: Evitar que Pages procese la salida con Jekyll
+        run: touch out/.nojekyll
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: out
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

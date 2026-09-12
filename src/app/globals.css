@@ -1,0 +1,520 @@
+@import "tailwindcss";
+
+/* ============================================================
+   LA CAFEBRERÍA UIO — sistema de diseño
+
+   Todos los colores de marca están MEDIDOS del material del cliente
+   (logotipo y carta 2026), no elegidos a ojo:
+
+     espresso   #57351A  blob del logotipo, 36.436 px de relleno plano
+     ámbar      #E5A93D  pastilla de precio "30 cm"
+     terracota  #C16826  pastilla de precio "hojaldre" y "pancakes"
+     teal       #5EA3A4  pastilla "veggie"
+     menta      #B5D5C6  pastilla "especial"
+     oro        #CA9F3E  la "C" del logotipo
+
+   Contrastes verificados con contrast.py (WCAG 2.2 AA). La regla que
+   gobierna el sistema: NINGÚN color de marca aprueba 4.5:1 como relleno
+   con texto blanco encima. Por eso cada acento tiene dos tokens:
+
+     identidad  → fondos, iconos, bordes, texto grande (≥3:1)
+     fill       → relleno interactivo con texto encima (≥4.5:1)
+
+   El precio va en espresso sobre ámbar (5.22:1), como en el impreso,
+   nunca en blanco sobre ámbar (2.08:1 · reprueba).
+   ============================================================ */
+@theme {
+  /* -- superficies ------------------------------------------------ */
+  --color-paper: #f7f2ea;         /* fondo general — crema cálido */
+  --color-paper-2: #f1e9dd;       /* bloques alternos */
+  --color-card: #ffffff;          /* tarjetas y fichas */
+  --color-espresso: #57351a;      /* marca · fondos oscuros amplios */
+  --color-espresso-deep: #3a240f; /* pie y bloques de máximo peso */
+
+  /* -- líneas ----------------------------------------------------- */
+  --color-line: #e3d8c9;          /* filetes decorativos */
+  --color-line-strong: #cbb9a1;   /* separadores con presencia */
+  --color-line-control: #8d7a64;  /* límites de controles — 3.69:1 sobre papel (WCAG 1.4.11) */
+
+  /* -- tinta ------------------------------------------------------ */
+  --color-ink: #2a1b0f;           /* 14.93:1 sobre papel · AAA */
+  --color-ink-dim: #6f6257;       /* 5.29:1 sobre papel · AA */
+  --color-ink-invert: #fdf8f0;    /* sobre espresso: 9.2:1 */
+
+  /* -- acentos · identidad ---------------------------------------- */
+  --color-amber: #e5a93d;         /* fondo de precio; texto espresso encima 5.22:1 */
+  --color-terracotta: #c16826;    /* 3.57:1 sobre papel → display ≥24px y bordes */
+  --color-teal: #5ea3a4;
+  --color-mint: #b5d5c6;          /* fondo suave; tinta encima 10.54:1 */
+  --color-gold: #ca9f3e;          /* detalle del logotipo */
+
+  /* -- acentos · relleno con texto encima -------------------------- */
+  --color-terracotta-fill: #b36123;  /* blanco encima 4.52:1 · AA */
+  --color-terracotta-hover: #9c5520;
+  --color-teal-fill: #497f80;        /* blanco encima 4.53:1 · AA */
+  /* Variantes de TEXTO sobre papel. Se derivaron contra el fondo real
+     (#F7F2EA y #F1E9DD), no contra blanco: medido contra blanco el ámbar
+     daba 4.50 y sobre el papel crema se quedaba en 4.04. */
+  --color-amber-deep: #856223;       /* 5.00 sobre papel · 4.63 sobre papel-2 */
+  --color-terracotta-text: #a05620;  /* 4.90 sobre papel · 4.53 sobre papel-2 */
+
+  /* -- tipografía ------------------------------------------------- */
+  --font-display: var(--font-bitter), Georgia, "Times New Roman", serif;
+  --font-body: var(--font-karla), ui-sans-serif, system-ui, sans-serif;
+
+  --text-display: clamp(2.9rem, 11vw, 7rem);
+  --text-display--line-height: 0.86;
+  --text-display--letter-spacing: -0.03em;
+  --text-h1: clamp(2.1rem, 5.4vw, 3.6rem);
+  --text-h1--line-height: 1.04;
+  --text-h1--letter-spacing: -0.022em;
+  --text-h2: clamp(1.65rem, 3.6vw, 2.5rem);
+  --text-h2--line-height: 1.1;
+  --text-h2--letter-spacing: -0.018em;
+  --text-h3: clamp(1.15rem, 1.9vw, 1.45rem);
+  --text-h3--line-height: 1.25;
+  --text-h3--letter-spacing: -0.01em;
+
+  /* -- radios ----------------------------------------------------- */
+  --radius-xs: 3px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 26px;
+
+  /* -- movimiento ------------------------------------------------- */
+  --ease-swift: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out-soft: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* -- z-index ---------------------------------------------------- */
+  --z-header: 60;
+  --z-drawer: 70;
+  --z-bar: 65;
+  --z-modal: 80;
+}
+
+:root {
+  --dur-fast: 150ms;
+  --dur-base: 260ms;
+  --dur-slow: 420ms;
+
+  --shadow-card: 0 1px 2px rgb(87 53 26 / 0.06), 0 10px 30px -18px rgb(87 53 26 / 0.35);
+  --shadow-lift: 0 2px 4px rgb(87 53 26 / 0.08), 0 22px 48px -22px rgb(87 53 26 / 0.45);
+
+  --header-h: 64px;
+  /* Reserva para la barra de acciones fija de móvil. */
+  --bar-h: 0px;
+  --shell: 1180px;
+  color-scheme: light;
+}
+
+@media (max-width: 767px) {
+  :root { --bar-h: 68px; }
+}
+
+/* ============================================================
+   BASE
+   ============================================================ */
+@layer base {
+  * {
+    border-color: var(--color-line);
+  }
+
+  html {
+    scroll-behavior: smooth;
+    /* Ni el header ni la barra fija de móvil deben tapar aquello a lo que se
+       desplaza el navegador: ni el destino de un ancla ni el control que acaba
+       de recibir el foco con el tabulador (WCAG 2.4.11). */
+    scroll-padding-top: calc(var(--header-h) + 20px);
+    scroll-padding-bottom: calc(var(--bar-h) + 16px);
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-body);
+    font-size: 1rem;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    overflow-x: hidden;
+    /* deja sitio a la barra de acciones de móvil y al área segura */
+    padding-bottom: calc(var(--bar-h) + env(safe-area-inset-bottom, 0px));
+  }
+
+  h1, h2, h3, h4, h5 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    text-wrap: balance;
+    color: var(--color-espresso);
+  }
+
+  /* Foco visible en todo el sitio · espresso sobre papel 9.77:1 (WCAG 2.2) */
+  :focus-visible {
+    outline: 3px solid var(--color-espresso);
+    outline-offset: 3px;
+    border-radius: var(--radius-xs);
+  }
+  :focus:not(:focus-visible) { outline: none; }
+
+  /* Sobre fondo espresso el filete oscuro desaparece: se invierte. */
+  .on-dark :focus-visible,
+  .on-dark:focus-visible {
+    outline-color: var(--color-amber);
+  }
+
+  ::selection {
+    background: var(--color-amber);
+    color: var(--color-espresso);
+  }
+
+  /* Cifras tabulares: los precios no deben bailar entre filas. */
+  .tabular,
+  .price,
+  table {
+    font-variant-numeric: tabular-nums;
+  }
+
+  img, svg, video {
+    display: block;
+    max-width: 100%;
+  }
+
+  button, [role="button"], a {
+    touch-action: manipulation;
+  }
+}
+
+/* ============================================================
+   COMPONENTES
+   ============================================================ */
+@layer components {
+  .shell {
+    width: 100%;
+    max-width: var(--shell);
+    margin-inline: auto;
+    padding-inline: 1.25rem;
+  }
+  @media (min-width: 768px) {
+    .shell { padding-inline: 2rem; }
+  }
+
+  /* --- Botones -------------------------------------------------- */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.55rem;
+    min-height: 48px;              /* objetivo táctil cómodo */
+    padding: 0.75rem 1.4rem;
+    border-radius: var(--radius-sm);
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 0.95rem;
+    letter-spacing: 0.01em;
+    line-height: 1;
+    cursor: pointer;
+    text-align: center;
+    transition:
+      background-color var(--dur-fast) var(--ease-in-out-soft),
+      border-color var(--dur-fast) var(--ease-in-out-soft),
+      color var(--dur-fast) var(--ease-in-out-soft),
+      box-shadow var(--dur-base) var(--ease-swift),
+      transform var(--dur-fast) var(--ease-swift);
+  }
+  .btn:active { transform: translateY(1px) scale(0.985); }
+  .btn[disabled], .btn[aria-disabled="true"] {
+    opacity: 0.45;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+
+  /* El relleno es más oscuro que la terracota de identidad a propósito:
+     #C16826 con blanco da 3.98:1 y reprueba; #B36123 da 4.52:1. */
+  .btn-primary {
+    background: var(--color-terracotta-fill);
+    color: #fff;
+    box-shadow: 0 8px 22px -14px rgb(179 97 35 / 0.9);
+  }
+  .btn-primary:hover { background: var(--color-terracotta-hover); }
+
+  .btn-dark {
+    background: var(--color-espresso);
+    color: var(--color-ink-invert);
+  }
+  .btn-dark:hover { background: var(--color-espresso-deep); }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--color-espresso);
+    border: 1.5px solid var(--color-line-control);
+  }
+  .btn-ghost:hover {
+    border-color: var(--color-espresso);
+    background: rgb(87 53 26 / 0.05);
+  }
+
+  .btn-sm { min-height: 40px; padding: 0.5rem 0.95rem; font-size: 0.86rem; }
+
+  /* --- Superficies ---------------------------------------------- */
+  .card {
+    background: var(--color-card);
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
+  }
+
+  .card-interactive {
+    transition:
+      border-color var(--dur-base) var(--ease-in-out-soft),
+      box-shadow var(--dur-base) var(--ease-swift),
+      transform var(--dur-base) var(--ease-swift);
+  }
+  .card-interactive:hover {
+    border-color: var(--color-line-strong);
+    box-shadow: var(--shadow-lift);
+    transform: translateY(-3px);
+  }
+
+  /* --- Etiquetas ------------------------------------------------- */
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: var(--font-body);
+    font-size: 0.75rem;   /* 12 px: por debajo no se publica texto */
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--color-amber-deep);
+  }
+
+  /* Definición de diccionario — el gesto que la carta usa para presentar
+     cada categoría: «(1. m. Ven.) Panecillo de masa suave…». */
+  .definition {
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: var(--color-ink-dim);
+    max-width: 34ch;
+  }
+  .definition .gram {
+    font-weight: 700;
+    font-style: italic;
+    color: var(--color-espresso);
+  }
+
+  /* --- Pastilla de precio ---------------------------------------
+     Reproduce la forma del impreso: rectángulo con la esquina inferior
+     derecha cortada en diagonal. */
+  .price-chip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 34px;
+    padding: 0.3rem 0.95rem 0.35rem;
+    background: var(--color-amber);
+    color: var(--color-espresso);         /* 5.22:1 · AA */
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 1rem;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+    clip-path: polygon(0 0, 100% 0, 100% 62%, 88% 100%, 0 100%);
+  }
+  .price-chip-terracotta {
+    background: var(--color-terracotta-fill);
+    color: #fff;                           /* 4.52:1 · AA */
+  }
+  .price-chip-mint {
+    background: var(--color-mint);
+    color: var(--color-ink);               /* 10.54:1 · AAA */
+  }
+  .price-chip-teal {
+    background: var(--color-teal-fill);
+    color: #fff;                           /* 4.53:1 · AA */
+  }
+
+  /* Precio sin pastilla, alineado a la derecha como en la carta. */
+  .price {
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 1.02rem;
+    color: var(--color-espresso);
+    white-space: nowrap;
+  }
+
+  /* --- Etiqueta informativa (notas de la carta) ------------------ */
+  .note {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.42rem 0.85rem;
+    border-radius: 99px;
+    border: 1.5px solid var(--color-teal);
+    background: rgb(94 163 164 / 0.12);
+    color: var(--color-ink);
+    font-size: 0.88rem;
+    line-height: 1.35;
+  }
+  .note-amber {
+    border-color: var(--color-amber);
+    background: rgb(229 169 61 / 0.16);
+  }
+
+  /* --- Filete punteado ------------------------------------------
+     El separador de la carta impresa: una fila de puntos espaciados. */
+  .dotted-rule {
+    height: 5px;
+    background-image: radial-gradient(circle, var(--color-line-strong) 2px, transparent 2.2px);
+    background-size: 22px 5px;
+    background-repeat: repeat-x;
+    background-position: left center;
+  }
+
+  /* --- Navegación ------------------------------------------------ */
+  .nav-link {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    font-family: var(--font-body);
+    font-size: 0.94rem;
+    font-weight: 600;
+    color: var(--color-ink-dim);
+    transition: color var(--dur-fast) var(--ease-in-out-soft);
+  }
+  .nav-link:hover { color: var(--color-espresso); }
+  .nav-link[aria-current="page"],
+  .nav-link[aria-current="true"] { color: var(--color-espresso); }
+  .nav-link[aria-current="page"]::after,
+  .nav-link[aria-current="true"]::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -6px;
+    height: 2.5px;
+    border-radius: 2px;
+    background: var(--color-terracotta);
+  }
+
+  /* --- Chip de sección de la carta -------------------------------- */
+  .section-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    min-height: 40px;
+    padding: 0.4rem 0.95rem;
+    border-radius: 99px;
+    border: 1.5px solid var(--color-line-strong);
+    background: var(--color-card);
+    color: var(--color-ink-dim);
+    font-family: var(--font-body);
+    font-size: 0.88rem;
+    font-weight: 600;
+    line-height: 1.2;
+    white-space: nowrap;
+    cursor: pointer;
+    transition:
+      background-color var(--dur-fast) var(--ease-in-out-soft),
+      border-color var(--dur-fast) var(--ease-in-out-soft),
+      color var(--dur-fast) var(--ease-in-out-soft);
+  }
+  .section-chip:hover { border-color: var(--color-espresso); color: var(--color-espresso); }
+  .section-chip[aria-current="true"] {
+    background: var(--color-espresso);
+    border-color: var(--color-espresso);
+    color: var(--color-ink-invert);
+  }
+
+  /* --- Formularios ----------------------------------------------- */
+  .field-label {
+    display: block;
+    font-family: var(--font-body);
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--color-ink);
+    margin-bottom: 0.4rem;
+  }
+
+  .field {
+    width: 100%;
+    min-height: 48px;
+    padding: 0.7rem 0.9rem;
+    background: var(--color-card);
+    border: 1.5px solid var(--color-line-control);  /* 3.69:1 · WCAG 1.4.11 */
+    border-radius: var(--radius-sm);
+    color: var(--color-ink);
+    font-family: var(--font-body);
+    font-size: 1rem;   /* 16px evita el zoom automático en iOS */
+    line-height: 1.4;
+    transition: border-color var(--dur-fast) var(--ease-in-out-soft);
+  }
+  .field::placeholder { color: var(--color-ink-dim); }
+  .field:hover { border-color: var(--color-espresso); }
+  .field:focus { border-color: var(--color-espresso); }
+  .field[aria-invalid="true"] { border-color: #a33a12; }
+  textarea.field { min-height: 120px; resize: vertical; }
+
+  /* --- Bloque oscuro --------------------------------------------- */
+  .on-dark {
+    background: var(--color-espresso);
+    color: var(--color-ink-invert);
+  }
+  .on-dark h1, .on-dark h2, .on-dark h3, .on-dark h4 { color: var(--color-ink-invert); }
+  .on-dark .eyebrow { color: var(--color-amber); }
+}
+
+/* ============================================================
+   UTILIDADES
+   ============================================================ */
+
+/* Display partido en dos líneas, como los títulos de la carta:
+   CACHI-/TOS, CA-/FÉ, POS-/TRES. */
+@utility display-stack {
+  font-family: var(--font-display);
+  font-weight: 700;
+  /* Tope propio, no `--text-display`: este título vive dentro de una columna
+     de 24rem y con el tamaño del hero desbordaba sobre la lista de platos. */
+  font-size: clamp(2.1rem, 4.4vw, 3.25rem);
+  line-height: 0.88;
+  letter-spacing: -0.03em;
+  color: var(--color-espresso);
+  text-wrap: nowrap;
+}
+
+/* Textura de papel: grano muy leve para que el crema no se vea plano. */
+@utility paper-grain {
+  background-image:
+    radial-gradient(circle at 20% 30%, rgb(87 53 26 / 0.035) 0, transparent 55%),
+    radial-gradient(circle at 82% 12%, rgb(229 169 61 / 0.07) 0, transparent 45%),
+    radial-gradient(circle at 65% 88%, rgb(94 163 164 / 0.05) 0, transparent 50%);
+}
+
+/* ============================================================
+   ANIMACIONES
+   ============================================================ */
+@keyframes steam-rise {
+  0%   { transform: translateY(2px) scaleX(1);    opacity: 0; }
+  25%  { opacity: 0.75; }
+  100% { transform: translateY(-16px) scaleX(1.5); opacity: 0; }
+}
+
+/* ============================================================
+   MOVIMIENTO REDUCIDO
+   Se conserva la información, se elimina el desplazamiento.
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .btn:active { transform: none; }
+  .card-interactive:hover { transform: none; }
+}
